@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About TPEN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 5rem;
+            text-align: center;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        section {
+            height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 20% 0 20%;
+            position: relative;
+        }
+
+        section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            right: 10%;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent
+            );
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: #41b9ff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            section {
+                padding: 0 10% 0 10%;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>About TPEN</h1>
+    </div>
+
+    <section>
+        <h2>Our Vision</h2>
+        <p>At TPEN Studios, we believe in pushing the boundaries of what's possible in game development. Our team of passionate creators works tirelessly to craft immersive experiences that captivate and inspire players around the world.</p>
+    </section>
+
+    <section>
+        <h2>Our Journey</h2>
+        <p>Founded in 2023, TPEN Studios has quickly established itself as a pioneer in innovative game design. We combine cutting-edge technology with creative storytelling to create unique gaming experiences that stand out in the digital landscape.</p>
+    </section>
+
+    <section>
+        <h2>Our Commitment</h2>
+        <p>Quality and player satisfaction are at the heart of everything we do. We're committed to creating games that not only entertain but also bring communities together, fostering meaningful connections through shared gaming experiences.</p>
+    </section>
+
+    <section>
+        <h2>The Future</h2>
+        <p>As we look ahead, our focus remains on innovation and excellence. We're constantly exploring new technologies and creative approaches to game development, ensuring that TPEN Studios stays at the forefront of the gaming industry.</p>
+    </section>
+</body>
+</html> 
