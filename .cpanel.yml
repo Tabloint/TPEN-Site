@@ -8,4 +8,6 @@ deployment:
     - /bin/cp -R js $DEPLOYPATH
     - /bin/cp index.html $DEPLOYPATH
     - /bin/cp landing.html $DEPLOYPATH
-    - /bin/cp .htaccess $DEPLOYPATH 
+
+
+    
