@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPEN Studios</title>
+    <meta http-equiv="refresh" content="0; URL=landing.html">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        
+        .loading {
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+        }
+        
+        .dot {
+            animation: pulse 1.5s infinite;
+            display: inline-block;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.2;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading">
+        Redirecting to TPEN Studios<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span>
+    </div>
+    
+    <script>
+        // Redirect to landing page
+        window.location.href = "landing.html";
+    </script>
+</body>
+</html> 
