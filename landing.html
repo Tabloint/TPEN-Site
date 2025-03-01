@@ -397,8 +397,10 @@
             // Galaxy settings
             const shards = [];
             const connections = [];
-            const numShards = 80; // Number of glass shards
-            const connectionDistance = 200; // Maximum distance for connections
+            const numShards = 80; // Number of glass shards for desktop
+            const mobileShards = 30; // Reduced number for mobile
+            const connectionDistance = 200; // Maximum distance for connections on desktop
+            const mobileConnectionDistance = 300; // Increased distance for mobile to space things out
             
             // Toggle info section
             infoHandle.addEventListener('click', function(e) {
@@ -437,18 +439,34 @@
                 
                 // Use fewer shards on mobile
                 const isMobile = window.innerWidth <= 768;
-                const shardCount = isMobile ? 40 : numShards;
+                const shardCount = isMobile ? mobileShards : numShards;
                 
                 for (let i = 0; i < shardCount; i++) {
                     const shard = document.createElement('div');
                     shard.classList.add('shard');
                     
-                    const size = 10 + Math.random() * 30;
+                    // Larger shards on mobile for better visibility with fewer elements
+                    const minSize = isMobile ? 15 : 10;
+                    const maxSize = isMobile ? 40 : 30;
+                    const size = minSize + Math.random() * (maxSize - minSize);
+                    
                     shard.style.width = `${size}px`;
                     shard.style.height = `${size}px`;
                     
-                    const x = Math.random() * window.innerWidth;
-                    const y = Math.random() * window.innerHeight;
+                    // Better distribute shards across the screen
+                    // Divide screen into grid cells and place one shard per cell with some randomness
+                    const gridCols = Math.ceil(Math.sqrt(shardCount));
+                    const gridRows = Math.ceil(shardCount / gridCols);
+                    
+                    const cellWidth = window.innerWidth / gridCols;
+                    const cellHeight = window.innerHeight / gridRows;
+                    
+                    const col = i % gridCols;
+                    const row = Math.floor(i / gridCols);
+                    
+                    // Add randomness within the cell
+                    const x = col * cellWidth + Math.random() * cellWidth;
+                    const y = row * cellHeight + Math.random() * cellHeight;
                     
                     const rotation = Math.random() * 360;
                     
@@ -484,9 +502,25 @@
                 });
                 connections.length = 0;
                 
+                const isMobile = window.innerWidth <= 768;
+                const maxConnections = isMobile ? 40 : 100; // Limit total connections
+                const maxConnectionsPerShard = isMobile ? 2 : 4; // Limit connections per shard
+                const effectiveConnectionDistance = isMobile ? mobileConnectionDistance : connectionDistance;
+                
+                let connectionCount = 0;
+                const shardConnectionCounts = new Array(shards.length).fill(0);
+                
                 // Create new connections between nearby shards
-                for (let i = 0; i < shards.length; i++) {
-                    for (let j = i + 1; j < shards.length; j++) {
+                for (let i = 0; i < shards.length && connectionCount < maxConnections; i++) {
+                    // Skip if this shard already has max connections
+                    if (shardConnectionCounts[i] >= maxConnectionsPerShard) continue;
+                    
+                    // Find potential connections and sort by distance
+                    const potentialConnections = [];
+                    
+                    for (let j = 0; j < shards.length; j++) {
+                        if (i === j || shardConnectionCounts[j] >= maxConnectionsPerShard) continue;
+                        
                         const shard1 = shards[i];
                         const shard2 = shards[j];
                         
@@ -494,29 +528,55 @@
                         const dy = shard2.y - shard1.y;
                         const distance = Math.sqrt(dx * dx + dy * dy);
                         
-                        if (distance < connectionDistance) {
-                            const connection = document.createElement('div');
-                            connection.classList.add('connection');
-                            
-                            // Calculate position and dimensions
-                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                            const opacity = (1 - distance / connectionDistance) * 0.8;
-                            
-                            // Apply styles
-                            connection.style.width = `${distance}px`;
-                            connection.style.left = `${shard1.x}px`;
-                            connection.style.top = `${shard1.y}px`;
-                            connection.style.transform = `rotate(${angle}deg)`;
-                            connection.style.opacity = opacity;
-                            
-                            connections.push({
-                                element: connection,
-                                shard1: shard1,
-                                shard2: shard2
+                        if (distance < effectiveConnectionDistance) {
+                            potentialConnections.push({
+                                index: j,
+                                distance: distance
                             });
-                            
-                            galaxyContainer.appendChild(connection);
                         }
+                    }
+                    
+                    // Sort by distance (closest first)
+                    potentialConnections.sort((a, b) => a.distance - b.distance);
+                    
+                    // Take only the closest connections up to the per-shard limit
+                    const connectionsToMake = potentialConnections.slice(0, maxConnectionsPerShard - shardConnectionCounts[i]);
+                    
+                    for (const conn of connectionsToMake) {
+                        if (connectionCount >= maxConnections) break;
+                        if (shardConnectionCounts[conn.index] >= maxConnectionsPerShard) continue;
+                        
+                        const shard1 = shards[i];
+                        const shard2 = shards[conn.index];
+                        
+                        const dx = shard2.x - shard1.x;
+                        const dy = shard2.y - shard1.y;
+                        const distance = conn.distance;
+                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        
+                        // Create connection element
+                        const connection = document.createElement('div');
+                        connection.classList.add('connection');
+                        
+                        // Apply styles
+                        connection.style.width = `${distance}px`;
+                        connection.style.left = `${shard1.x}px`;
+                        connection.style.top = `${shard1.y}px`;
+                        connection.style.transform = `rotate(${angle}deg)`;
+                        connection.style.opacity = (1 - distance / effectiveConnectionDistance) * 0.8;
+                        
+                        connections.push({
+                            element: connection,
+                            shard1: shard1,
+                            shard2: shard2
+                        });
+                        
+                        galaxyContainer.appendChild(connection);
+                        
+                        // Update connection counts
+                        shardConnectionCounts[i]++;
+                        shardConnectionCounts[conn.index]++;
+                        connectionCount++;
                     }
                 }
             }
@@ -605,12 +665,12 @@
                     }
                 });
                 
-                // Update connections - less frequently on mobile
+                // Update connections - much less frequently on mobile
                 if ((mouseSpeed > 1 && !isMobile) || (connections.length === 0)) {
                     updateConnections();
                 } else {
-                    // On mobile, only update connections occasionally to save performance
-                    if (!isMobile || Math.random() < 0.1) {
+                    // On mobile, only update connections very occasionally to save performance
+                    if (!isMobile || Math.random() < 0.05) {
                         // Update existing connections' positions
                         connections.forEach(conn => {
                             const shard1 = conn.shard1;
