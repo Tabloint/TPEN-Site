@@ -263,6 +263,10 @@
         @media (max-width: 768px) {
             .title {
                 font-size: 15vw;
+                /* Make title static on mobile */
+                position: fixed;
+                transform: translate(-50%, -50%);
+                transition: none;
             }
             
             .info-content {
@@ -417,7 +421,7 @@
                 }
             });
             
-            // Prevent galaxy interaction when scrolling the info section
+            
             infoContentWrapper.addEventListener('wheel', function(e) {
                 e.stopPropagation();
             });
@@ -427,29 +431,27 @@
             }, { passive: true });
             
             function createGalaxy() {
-                // Clear existing elements
                 galaxyContainer.innerHTML = '';
                 shards.length = 0;
                 connections.length = 0;
                 
-                // Create shards
-                for (let i = 0; i < numShards; i++) {
+                // Use fewer shards on mobile
+                const isMobile = window.innerWidth <= 768;
+                const shardCount = isMobile ? 40 : numShards;
+                
+                for (let i = 0; i < shardCount; i++) {
                     const shard = document.createElement('div');
                     shard.classList.add('shard');
                     
-                    // Random size between 10 and 40
                     const size = 10 + Math.random() * 30;
                     shard.style.width = `${size}px`;
                     shard.style.height = `${size}px`;
                     
-                    // Random position
                     const x = Math.random() * window.innerWidth;
                     const y = Math.random() * window.innerHeight;
                     
-                    // Random rotation
                     const rotation = Math.random() * 360;
                     
-                    // Store shard data
                     const shardData = {
                         element: shard,
                         x: x,
@@ -463,7 +465,6 @@
                         brightness: 0.5 + Math.random() * 0.5
                     };
                     
-                    // Apply initial styles
                     shard.style.left = `${x}px`;
                     shard.style.top = `${y}px`;
                     shard.style.transform = `rotate(${rotation}deg) scale(${shardData.brightness})`;
@@ -520,15 +521,18 @@
                 }
             }
             
-            // Update title position to follow cursor
+            // Update title position to follow cursor - only on desktop
             function updateTitle() {
-                // Smooth follow with slight delay
-                titleX += (mouseX - titleX) * 0.1;
-                titleY += (mouseY - titleY) * 0.1;
-                
-                title.style.left = `${titleX}px`;
-                title.style.top = `${titleY}px`;
-                title.style.transform = 'translate(-50%, -50%)';
+                // Only update title position on non-mobile devices
+                if (window.innerWidth > 768) {
+                    // Smooth follow with slight delay
+                    titleX += (mouseX - titleX) * 0.1;
+                    titleY += (mouseY - titleY) * 0.1;
+                    
+                    title.style.left = `${titleX}px`;
+                    title.style.top = `${titleY}px`;
+                    title.style.transform = 'translate(-50%, -50%)';
+                }
             }
             
             // Update galaxy based on mouse movement
@@ -544,6 +548,9 @@
                 // Update title
                 updateTitle();
                 
+                // Skip intensive updates on mobile
+                const isMobile = window.innerWidth <= 768;
+                
                 // Update shards
                 shards.forEach(shard => {
                     // Calculate distance from mouse
@@ -551,8 +558,8 @@
                     const dy = mouseY - shard.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    // Ripple effect based on mouse movement
-                    if (distance < 300) {
+                    // Reduce effects on mobile
+                    if (!isMobile && distance < 300) {
                         // Repel from mouse with intensity based on distance and mouse speed
                         const repelForce = (1 - distance / 300) * 0.5 * (1 + mouseSpeed * 0.1);
                         shard.velocityX -= dx * repelForce * 0.01;
@@ -567,15 +574,18 @@
                     }
                     
                     // Apply physics - return to original position
-                    const homeForceX = (shard.baseX - shard.x) * 0.01;
-                    const homeForceY = (shard.baseY - shard.y) * 0.01;
+                    // Reduce movement on mobile
+                    const homeForceMultiplier = isMobile ? 0.03 : 0.01;
+                    const homeForceX = (shard.baseX - shard.x) * homeForceMultiplier;
+                    const homeForceY = (shard.baseY - shard.y) * homeForceMultiplier;
                     
                     shard.velocityX += homeForceX;
                     shard.velocityY += homeForceY;
                     
-                    // Apply damping
-                    shard.velocityX *= 0.95;
-                    shard.velocityY *= 0.95;
+                    // Apply stronger damping on mobile for less movement
+                    const damping = isMobile ? 0.9 : 0.95;
+                    shard.velocityX *= damping;
+                    shard.velocityY *= damping;
                     
                     // Update position
                     shard.x += shard.velocityX;
@@ -595,25 +605,28 @@
                     }
                 });
                 
-                // Update connections
-                if (mouseSpeed > 1) {
+                // Update connections - less frequently on mobile
+                if ((mouseSpeed > 1 && !isMobile) || (connections.length === 0)) {
                     updateConnections();
                 } else {
-                    // Update existing connections' positions
-                    connections.forEach(conn => {
-                        const shard1 = conn.shard1;
-                        const shard2 = conn.shard2;
-                        
-                        const dx = shard2.x - shard1.x;
-                        const dy = shard2.y - shard1.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                        
-                        conn.element.style.width = `${distance}px`;
-                        conn.element.style.left = `${shard1.x}px`;
-                        conn.element.style.top = `${shard1.y}px`;
-                        conn.element.style.transform = `rotate(${angle}deg)`;
-                    });
+                    // On mobile, only update connections occasionally to save performance
+                    if (!isMobile || Math.random() < 0.1) {
+                        // Update existing connections' positions
+                        connections.forEach(conn => {
+                            const shard1 = conn.shard1;
+                            const shard2 = conn.shard2;
+                            
+                            const dx = shard2.x - shard1.x;
+                            const dy = shard2.y - shard1.y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                            
+                            conn.element.style.width = `${distance}px`;
+                            conn.element.style.left = `${shard1.x}px`;
+                            conn.element.style.top = `${shard1.y}px`;
+                            conn.element.style.transform = `rotate(${angle}deg)`;
+                        });
+                    }
                 }
                 
                 requestAnimationFrame(updateGalaxy);
@@ -667,6 +680,12 @@
             createGalaxy();
             updateGalaxy();
             initInfoCards();
+            
+            // Set initial title position for mobile
+            if (window.innerWidth <= 768) {
+                title.style.left = '50%';
+                title.style.top = '50%';
+            }
         });
     </script>
 </body>
