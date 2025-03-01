@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/username/public_html/tpen.xyz/
+    - export DEPLOYPATH=/home/glea98980022/public_html/
     - mkdir -p $DEPLOYPATH
     - /bin/cp -R * $DEPLOYPATH 
