@@ -2,5 +2,10 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/glea98980022/public_html/
-    - mkdir -p $DEPLOYPATH
-    - /bin/cp -R * $DEPLOYPATH 
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/cp -R images $DEPLOYPATH
+    - /bin/cp -R css $DEPLOYPATH
+    - /bin/cp -R js $DEPLOYPATH
+    - /bin/cp index.html $DEPLOYPATH
+    - /bin/cp landing.html $DEPLOYPATH
+    - /bin/cp .htaccess $DEPLOYPATH 
